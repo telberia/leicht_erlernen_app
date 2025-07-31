@@ -4,8 +4,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class AssetsService {
-  // Remove 'assets/' prefix since Flutter adds it automatically
-  static const String _basePath = 'App-data';
+  // Fix: Use the correct path that matches AssetManifest.json
+  static const String _basePath = 'assets/App-data';
   
   // Get PDF path for a lesson with multiple naming patterns and encoding
   static List<String> getPdfPaths(int lessonNumber) {

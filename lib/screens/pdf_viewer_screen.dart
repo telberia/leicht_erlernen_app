@@ -47,7 +47,7 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
     }
 
     if (_pdfPath != null) {
-      return SfPdfViewer.file(
+      return SfPdfViewer.asset(
         _pdfPath!,
         canShowPaginationDialog: true,
         canShowScrollHead: true,
