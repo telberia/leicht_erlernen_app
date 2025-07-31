@@ -1,0 +1,54 @@
+name: leicht_erlernen
+description: A new Flutter project for Leicht Erlernen app.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  # PDF viewer - updated version
+  syncfusion_flutter_pdfviewer: ^30.1.42
+  # Audio player - updated version
+  audioplayers: ^6.5.0
+  # File picker for loading PDFs
+  file_picker: ^6.1.1
+  # Path provider for file access
+  path_provider: ^2.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/App-data/
+    # Declare specific PDF files to ensure they are bundled
+    # Based on new directory names with underscores
+    - assets/App-data/Lektion_1/vt1_eBook_Lektion_1.pdf
+    - assets/App-data/Lektion_2/vt1_eBook_Lektion_2.pdf
+    - assets/App-data/Lektion_3/vt1_eBook_Lektion_3.pdf
+    - assets/App-data/Lektion_4/vt1_eBook_Lektion_4.pdf
+    - assets/App-data/Lektion_5/vt1_eBook_Lektion_5.pdf
+    - assets/App-data/Lektion_6/vt1_eBook_Lektion_6.pdf
+    - assets/App-data/Lektion_7/vt1_eBook_Lektion_7.pdf
+    - assets/App-data/Lektion_8/vt1_eBook_Lektion_8.pdf
+    - assets/App-data/Lektion_9/vt1_eBook_Lektion_9.pdf
+    - assets/App-data/Lektion_10/vt1_eBook_Lektion_10.pdf
+    - assets/App-data/Lektion_11/vt1_eBook_Lektion_11.pdf
+    - assets/App-data/Lektion_12/vt1_eBook_Lektion_12.pdf
+    - assets/App-data/Lektion_13/vt1_eBook_Lektion_13.pdf
+    - assets/App-data/Lektion_14/vt1_eBook_Lektion_14.pdf
+    - assets/App-data/Lektion_15/vt1_eBook_Lektion_15.pdf
+    - assets/App-data/Lektion_16/vt1_eBook_Lektion_16.pdf
+    - assets/App-data/Lektion_17/vt1_eBook_Lektion_17.pdf
+    - assets/App-data/Lektion_18/vt1_eBook_Lektion_18.pdf
+    - assets/App-data/Lektion_19/vt1_eBook_Lektion_19.pdf
+    - assets/App-data/Lektion_20/vt1_eBook_Lektion_20.pdf
