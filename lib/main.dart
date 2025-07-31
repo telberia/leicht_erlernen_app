@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart';
+import 'services/audio_service.dart';
 
 void main() {
   runApp(const LeichtErlernenApp());
@@ -115,15 +120,26 @@ class LessonDetailScreen extends StatelessWidget {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
-              // Title
-              Text(
-                'Lektion $lessonNumber',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF3b3ec3),
-                ),
-                textAlign: TextAlign.center,
+              // Back button and title
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back, color: Color(0xFF3b3ec3)),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Lektion $lessonNumber',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF3b3ec3),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(width: 48), // Balance the back button
+                ],
               ),
               const SizedBox(height: 40),
               
@@ -217,15 +233,26 @@ class AudioContentScreen extends StatelessWidget {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
-              // Title
-              Text(
-                'Lektion $lessonNumber',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF3b3ec3),
-                ),
-                textAlign: TextAlign.center,
+              // Back button and title
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back, color: Color(0xFF3b3ec3)),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Lektion $lessonNumber',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF3b3ec3),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(width: 48), // Balance the back button
+                ],
               ),
               const SizedBox(height: 40),
               
@@ -235,7 +262,12 @@ class AudioContentScreen extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 16),
                 child: ElevatedButton(
                   onPressed: () {
-                    _showComingSoonDialog(context, 'Tabellen/Wortlisten');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TabellenAudioScreen(lessonNumber: lessonNumber),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFFFFFF),
@@ -342,6 +374,249 @@ class AudioContentScreen extends StatelessWidget {
             child: const Text('OK'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class TabellenAudioScreen extends StatefulWidget {
+  final int lessonNumber;
+
+  const TabellenAudioScreen({super.key, required this.lessonNumber});
+
+  @override
+  State<TabellenAudioScreen> createState() => _TabellenAudioScreenState();
+}
+
+class _TabellenAudioScreenState extends State<TabellenAudioScreen> {
+  List<String> audioFiles = [];
+  bool isLoading = true;
+  AudioPlayer audioPlayer = AudioPlayer();
+  String? currentlyPlaying;
+  bool isPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAudioFiles();
+  }
+
+  Future<void> _loadAudioFiles() async {
+    try {
+      // Load real audio files from Tabellen folder using AudioService
+      List<String> realAudioFiles = await AudioService.getTabellenAudioFiles(widget.lessonNumber);
+      
+      setState(() {
+        audioFiles = realAudioFiles;
+        isLoading = false;
+      });
+      
+      print('✅ Loaded ${realAudioFiles.length} real audio files for Lektion ${widget.lessonNumber}');
+      
+    } catch (e) {
+      print('❌ Error loading audio files: $e');
+      setState(() {
+        audioFiles = [];
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _playAudio(String audioFile) async {
+    try {
+      if (currentlyPlaying == audioFile && isPlaying) {
+        // Pause current audio
+        await audioPlayer.pause();
+        setState(() {
+          isPlaying = false;
+        });
+      } else if (currentlyPlaying == audioFile && !isPlaying) {
+        // Resume current audio
+        await audioPlayer.resume();
+        setState(() {
+          isPlaying = true;
+        });
+      } else {
+        // Play new audio
+        await audioPlayer.stop();
+        
+        // Get the real asset path using AudioService
+        String assetPath = AudioService.getAudioAssetPath(widget.lessonNumber, audioFile);
+        
+        // Check if the audio file exists
+        bool fileExists = await AudioService.audioFileExists(widget.lessonNumber, audioFile);
+        
+        if (fileExists) {
+          try {
+            // Play the real audio file
+            await audioPlayer.play(AssetSource(assetPath));
+            
+            print('🎵 Playing real audio: $assetPath');
+            
+            setState(() {
+              currentlyPlaying = audioFile;
+              isPlaying = true;
+            });
+            
+            // Listen for completion
+            audioPlayer.onPlayerComplete.listen((event) {
+              setState(() {
+                isPlaying = false;
+              });
+            });
+            
+          } catch (e) {
+            print('❌ Error playing real audio file: $e');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Fehler beim Abspielen: $e'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        } else {
+          print('❌ Audio file not found: $assetPath');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Audio-Datei nicht gefunden: $audioFile'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('❌ Error in _playAudio: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Fehler beim Abspielen: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    audioPlayer.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFFFFF),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              // Back button and title
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back, color: Color(0xFF3b3ec3)),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Lektion ${widget.lessonNumber} Tabellen',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF3b3ec3),
+                        decoration: TextDecoration.underline,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(width: 48), // Balance the back button
+                ],
+              ),
+              const SizedBox(height: 40),
+              
+              // Audio files list
+              Expanded(
+                child: isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF3b3ec3),
+                        ),
+                      )
+                    : audioFiles.isEmpty
+                        ? const Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.folder_open,
+                                  size: 64,
+                                  color: Color(0xFF3b3ec3),
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'Keine Audio-Dateien gefunden',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Color(0xFF3b3ec3),
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Folder "Tabellen" existiert nicht',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: audioFiles.length,
+                            itemBuilder: (context, index) {
+                              final audioFile = audioFiles[index];
+                              final isCurrentPlaying = currentlyPlaying == audioFile && isPlaying;
+                              
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 16),
+                                child: ElevatedButton.icon(
+                                  onPressed: () => _playAudio(audioFile),
+                                  icon: Icon(
+                                    isCurrentPlaying ? Icons.pause : Icons.play_arrow,
+                                    color: const Color(0xFF3b3ec3),
+                                  ),
+                                  label: Expanded(
+                                    child: Text(
+                                      audioFile,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xFF3b3ec3),
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFFFFFF),
+                                    foregroundColor: const Color(0xFF3b3ec3),
+                                    side: const BorderSide(
+                                      color: Color(0xFF3b3ec3),
+                                      width: 1,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                                    elevation: 0,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

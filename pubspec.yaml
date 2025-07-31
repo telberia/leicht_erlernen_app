@@ -54,3 +54,23 @@ flutter:
     - assets/App-data/Lektion_18/vt1_eBook_Lektion_18.pdf
     - assets/App-data/Lektion_19/vt1_eBook_Lektion_19.pdf
     - assets/App-data/Lektion_20/vt1_eBook_Lektion_20.pdf
+    # Audio files for Tabellen folders
+    - assets/App-data/Lektion_1/Tabellen/
+    - assets/App-data/Lektion_2/Tabellen/
+    - assets/App-data/Lektion_3/Tabellen/
+    - assets/App-data/Lektion_4/Tabellen/
+    - assets/App-data/Lektion_5/Tabellen/
+    - assets/App-data/Lektion_6/Tabellen/
+    - assets/App-data/Lektion_7/Tabellen/
+    - assets/App-data/Lektion_8/Tabellen/
+    - assets/App-data/Lektion_9/Tabellen/
+    - assets/App-data/Lektion_11/Tabellen/
+    - assets/App-data/Lektion_12/Tabellen/
+    - assets/App-data/Lektion_13/Tabellen/
+    - assets/App-data/Lektion_14/Tabellen/
+    - assets/App-data/Lektion_15/Tabellen/
+    - assets/App-data/Lektion_16/Tabellen/
+    - assets/App-data/Lektion_17/Tabellen/
+    - assets/App-data/Lektion_18/Tabellen/
+    - assets/App-data/Lektion_19/Tabellen/
+    - assets/App-data/Lektion_20/Tabellen/
